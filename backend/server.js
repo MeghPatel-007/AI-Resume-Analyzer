@@ -1,12 +1,13 @@
 require('dotenv').config()
 
-const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
 const morgan = require('morgan')
 
 const dbModule = require('./config/db')
+const express = require('express')
 
+app.set('trust proxy', 1)
 console.log('DB MODULE:', dbModule)
 
 const connectDB = dbModule.default || dbModule.connectDB || dbModule

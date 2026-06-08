@@ -1,37 +1,40 @@
-const winston = require('winston');
-const fs = require('fs');
-const path = require('path');
+const winston = require('winston')
 
-const logDir = path.join(__dirname, '../../logs');
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
-}
+const { combine, timestamp, printf, colorize, errors } = winston.format
 
-const { combine, timestamp, printf, colorize, errors } = winston.format;
-
-const logFormat = printf(({ level, message, timestamp, stack }) => {
-  return `${timestamp} [${level}]: ${stack || message}`;
-});
+const logFormat = printf(
+  ({ level, message, timestamp, stack }) =>
+    `${timestamp} [${level}] ${stack || message}`,
+)
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
+
   format: combine(
-    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    errors({ stack: true }),
-    logFormat
+    timestamp({
+      format: 'YYYY-MM-DD HH:mm:ss',
+    }),
+
+    errors({
+      stack: true,
+    }),
+
+    logFormat,
   ),
+
   transports: [
     new winston.transports.Console({
-      format: combine(colorize(), timestamp({ format: 'HH:mm:ss' }), logFormat),
-    }),
-    new winston.transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
-    }),
-    new winston.transports.File({
-      filename: 'logs/combined.log',
+      format: combine(
+        colorize(),
+
+        timestamp({
+          format: 'HH:mm:ss',
+        }),
+
+        logFormat,
+      ),
     }),
   ],
-});
+})
 
-module.exports = logger;
+module.exports = logger
