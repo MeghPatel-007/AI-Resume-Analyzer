@@ -171,23 +171,29 @@ const parseResume = async (fileBuffer, originalFilename) => {
   }
 
   return {
-    rawText,
+    rawText: rawText || '',
 
-    wordCount: rawText.split(/\s+/).length,
+    wordCount: rawText ? rawText.split(/\s+/).length : 0,
 
-    personalInfo: extractPersonalInfo(rawText),
+    personalInfo: extractPersonalInfo(rawText || ''),
 
-    detectedSections: detectSections(rawText),
+    detectedSections: detectSections(rawText || []),
 
-    education: extractEducation(rawText),
+    education: extractEducation(rawText || '') || [],
 
-    experience: extractExperience(rawText),
+    experience: extractExperience(rawText || '') || [],
 
-    skills: extractSkills(rawText),
+    skills: extractSkills(rawText || '') || [],
 
-    projects: extractProjects(rawText),
+    projects: extractProjects(rawText)
+      ? [
+          {
+            title: extractProjects(rawText),
+          },
+        ]
+      : [],
 
-    summary: extractSummary(rawText),
+    summary: extractSummary(rawText) || '',
 
     certifications: [],
   }
