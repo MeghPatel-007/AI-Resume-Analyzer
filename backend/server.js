@@ -5,7 +5,13 @@ const cors = require('cors')
 const helmet = require('helmet')
 const morgan = require('morgan')
 
-const connectDB = require('./config/db')
+const dbModule = require('./config/db')
+
+console.log('DB MODULE:', dbModule)
+
+const connectDB = dbModule.default || dbModule.connectDB || dbModule
+
+console.log('TYPE:', typeof connectDB)
 
 const logger = require('./utils/logger')
 
@@ -19,91 +25,43 @@ const healthRoutes = require('./routes/healthRoutes')
 
 const app = express()
 
-// Connect DB
+// ONLY THIS
 console.log('Before DB')
 
-connectDB()
-  .then(() => {
-    console.log('DB connected')
-  })
-  .catch((err) => {
-    console.error('DB ERROR:', err.message)
-  })
+if (typeof connectDB === 'function') {
+  connectDB()
+    .then(() => {
+      console.log('DB connected')
+    })
+    .catch((err) => {
+      console.error('DB ERROR:', err)
+    })
+}
 
 console.log('After DB')
 
-// Security
-app.use(
-  helmet({
-    crossOriginResourcePolicy: {
-      policy: 'cross-origin',
-    },
-  }),
-)
+app.use(helmet())
 
-// CORS
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
-  .split(',')
-  .map((x) => x.trim())
+app.use(cors())
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true)
-      }
+app.use(express.json())
 
-      callback(new Error('Origin not allowed'))
-    },
-
-    credentials: true,
-  }),
-)
-
-// Body parsing
-app.use(
-  express.json({
-    limit: '10mb',
-  }),
-)
-
-app.use(
-  express.urlencoded({
-    extended: true,
-
-    limit: '10mb',
-  }),
-)
-
-// Logs
 app.use(
   morgan('combined', {
     stream: {
-      write(msg) {
-        logger.http(msg.trim())
-      },
+      write: console.log,
     },
   }),
 )
 
-// Rate limit
 app.use('/api', generalLimiter)
 
-// Routes
 app.use('/api/resume', resumeRoutes)
 
 app.use('/health', healthRoutes)
 
-app.get('/', (req, res) => {
-  res.json({
-    status: 'running',
-  })
-})
-
-// Error handlers
 app.use(notFound)
 
 app.use(errorHandler)
 
-// IMPORTANT
 module.exports = app
