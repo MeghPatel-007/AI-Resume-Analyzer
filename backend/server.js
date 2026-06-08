@@ -20,11 +20,13 @@ const healthRoutes = require('./routes/healthRoutes')
 const app = express()
 
 // Connect DB
-// connectDB()
-
-console.log(
-  'SERVER STARTED'
-)
+connectDB()
+  .then(() => {
+    logger.info('Mongo connected')
+  })
+  .catch((err) => {
+    console.error(err)
+  })
 
 // Security
 app.use(
