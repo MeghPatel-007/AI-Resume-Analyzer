@@ -61,6 +61,8 @@ const uploadResume = async (req, res) => {
 
     logger.info(`Analyzing resume: ${req.file.originalname}`)
 
+    console.log('PARSED DATA:', JSON.stringify(parsed, null, 2))
+
     const analysis = await analyzeResume(parsed)
 
     resumeDoc.atsScore = analysis.atsScore
