@@ -20,7 +20,11 @@ const healthRoutes = require('./routes/healthRoutes')
 const app = express()
 
 // Connect DB
-connectDB()
+// connectDB()
+
+console.log(
+  'SERVER STARTED'
+)
 
 // Security
 app.use(
